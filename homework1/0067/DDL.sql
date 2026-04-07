@@ -1,5 +1,3 @@
--- MySQL DDL for Taobao Database (Student ID: 0067)
-
 -- 1. 用户表 (User)
 CREATE TABLE `User` (
     `user_id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
