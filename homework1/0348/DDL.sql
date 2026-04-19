@@ -1,0 +1,200 @@
+CREATE TABLE IF NOT EXISTS `用户` (
+	`用户ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`用户名` VARCHAR(20) NOT NULL,
+	`密码` VARCHAR(20) NOT NULL,
+	`手机号` VARCHAR(11) NOT NULL,
+	`邮箱` VARCHAR(30),
+	`是否88vip` BOOLEAN NOT NULL COMMENT '0代表非会员，1代表会员',
+	`88vip有效期` DATETIME,
+	PRIMARY KEY(`用户ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `店铺` (
+	`店铺ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`店铺名称` VARCHAR(30) NOT NULL,
+	`店铺类型` VARCHAR(30) NOT NULL,
+	`店铺星级评分` DECIMAL(2,1) NOT NULL,
+	`店铺开业时间` DATETIME NOT NULL,
+	PRIMARY KEY(`店铺ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `商品分类` (
+	`商品分类ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`商品分类名` VARCHAR(20) NOT NULL,
+	`母分类ID` INTEGER UNSIGNED,
+	PRIMARY KEY(`商品分类ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `商品` (
+	`商品ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`商品名` VARCHAR(50) NOT NULL,
+	`价格` DECIMAL(10,3) NOT NULL,
+	`库存` INTEGER NOT NULL,
+	`店铺ID` INTEGER UNSIGNED NOT NULL,
+	`商品分类ID` INTEGER UNSIGNED NOT NULL,
+	PRIMARY KEY(`商品ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `订单` (
+	`订单ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`用户ID` INTEGER UNSIGNED NOT NULL,
+	`店铺ID` INTEGER UNSIGNED NOT NULL,
+	`实付金额` DECIMAL(10,3) NOT NULL,
+	`订单状态` VARCHAR(10) NOT NULL,
+	`创建时间` DATETIME NOT NULL,
+	PRIMARY KEY(`订单ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `物流信息` (
+	`物流信息ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`订单ID` INTEGER UNSIGNED NOT NULL,
+	`发货地址` TEXT(100) NOT NULL,
+	`收货地址` TEXT(100) NOT NULL,
+	`发货时间` DATETIME,
+	`承运组织` VARCHAR(20),
+	`自动收货时间` DATETIME,
+	`物流状态` VARCHAR(10) NOT NULL,
+	PRIMARY KEY(`物流信息ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `支付信息` (
+	`支付信息ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`订单ID` INTEGER UNSIGNED NOT NULL,
+	`实付金额` DECIMAL(10,3) NOT NULL,
+	`支付方式` VARCHAR(20),
+	`支付时间` DATETIME,
+	`支付状态` VARCHAR(20) NOT NULL,
+	PRIMARY KEY(`支付信息ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `评价` (
+	`评价ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`用户ID` INTEGER UNSIGNED NOT NULL,
+	`商品ID` INTEGER UNSIGNED NOT NULL,
+	`订单ID` INTEGER UNSIGNED NOT NULL,
+	`评分` INTEGER NOT NULL,
+	`评价内容` TEXT(500),
+	`评价时间` DATETIME,
+	PRIMARY KEY(`评价ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `购物车` (
+	`购物车ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`用户ID` INTEGER UNSIGNED NOT NULL,
+	`商品ID` INTEGER UNSIGNED NOT NULL,
+	PRIMARY KEY(`购物车ID`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `优惠信息` (
+	`优惠ID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+	`用户ID` INTEGER UNSIGNED NOT NULL,
+	`优惠券ID` INTEGER UNSIGNED NOT NULL,
+	`是否使用` BOOLEAN NOT NULL,
+	`失效日期` DATETIME,
+	PRIMARY KEY(`优惠ID`)
+);
+
+
+ALTER TABLE `商品`
+ADD FOREIGN KEY(`店铺ID`) REFERENCES `店铺`(`店铺ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `商品`
+ADD FOREIGN KEY(`商品分类ID`) REFERENCES `商品分类`(`商品分类ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `订单`
+ADD FOREIGN KEY(`用户ID`) REFERENCES `用户`(`用户ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `购物车`
+ADD FOREIGN KEY(`用户ID`) REFERENCES `用户`(`用户ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `购物车`
+ADD FOREIGN KEY(`商品ID`) REFERENCES `商品`(`商品ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `支付信息`
+ADD FOREIGN KEY(`订单ID`) REFERENCES `订单`(`订单ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `优惠信息`
+ADD FOREIGN KEY(`用户ID`) REFERENCES `用户`(`用户ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `物流信息`
+ADD FOREIGN KEY(`订单ID`) REFERENCES `订单`(`订单ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `评价`
+ADD FOREIGN KEY(`商品ID`) REFERENCES `商品`(`商品ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `评价`
+ADD FOREIGN KEY(`订单ID`) REFERENCES `订单`(`订单ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `评价`
+ADD FOREIGN KEY(`用户ID`) REFERENCES `用户`(`用户ID`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+-- 测试数据 INSERT 语句
+
+INSERT INTO `用户` (`用户名`, `密码`, `手机号`, `邮箱`, `是否88vip`, `88vip有效期`) VALUES
+('小明', '123456', '13800138000', 'xiaoming@qq.com', 1, '2026-12-31 23:59:59'),
+('小红', '654321', '13900139000', 'xiaohong@163.com', 0, NULL),
+('小刚', 'abc123', '13700137000', 'xiaogang@gmail.com', 0, NULL);
+
+INSERT INTO `店铺` (`店铺名称`, `店铺类型`, `店铺星级评分`, `店铺开业时间`) VALUES
+('小米官方旗舰店', '3C数码', 4.9, '2020-01-01 10:00:00'),
+('优衣库官方店', '服装鞋帽', 4.7, '2019-05-15 09:30:00'),
+('零食小铺', '食品生鲜', 4.5, '2022-08-08 11:20:00');
+
+INSERT INTO `商品分类` (`商品分类名`, `母分类ID`) VALUES
+('手机', 0),
+('电脑', 0),
+('男装', 0),
+('零食', 0),
+('饼干', 4),
+('膨化食品', 4);
+
+INSERT INTO `商品` (`商品名`, `价格`, `库存`, `店铺ID`, `商品分类ID`) VALUES
+('小米14', 3999.000, 100, 1, 1),
+('红米Turbo3', 1799.000, 200, 1, 1),
+('夏季短袖T恤', 99.000, 300, 2, 3),
+('牛仔裤', 159.000, 150, 2, 3),
+('薯片大礼包', 29.900, 500, 3, 6),
+('曲奇饼干', 19.900, 400, 3, 5);
+
+INSERT INTO `订单` (`用户ID`, `店铺ID`, `实付金额`, `订单状态`, `创建时间`) VALUES
+(1, 1, 3999.000, '待发货', '2025-04-19 14:30:00'),
+(1, 3, 49.800, '已完成', '2025-04-18 10:20:00'),
+(2, 2, 159.000, '待收货', '2025-04-19 09:15:00');
+
+INSERT INTO `物流信息` (`订单ID`, `发货地址`, `收货地址`, `发货时间`, `承运组织`, `自动收货时间`, `物流状态`) VALUES
+(1, '北京市海淀区小米科技园', '上海市浦东新区张江路100号', '2025-04-19 16:00:00', '顺丰速运', '2025-04-22 16:00:00', '运输中'),
+(2, '广州市白云区零食仓库', '深圳市南山区科技园', '2025-04-18 11:00:00', '中通快递', '2025-04-21 11:00:00', '已签收'),
+(3, '杭州市余杭区优衣库仓库', '成都市高新区天府大道', NULL, NULL, NULL, '待发货');
+
+INSERT INTO `支付信息` (`订单ID`, `实付金额`, `支付方式`, `支付时间`, `支付状态`) VALUES
+(1, 3999.000, '支付宝', '2025-04-19 14:31:00', '支付成功'),
+(2, 49.800, '微信支付', '2025-04-18 10:21:00', '支付成功'),
+(3, 159.000, '银行卡', '2025-04-19 09:16:00', '支付成功');
+
+INSERT INTO `评价` (`用户ID`, `商品ID`, `订单ID`, `评分`, `评价内容`, `评价时间`) VALUES
+(1, 1, 1, 5, '手机速度很快，拍照清晰，非常满意！', '2025-04-20 11:00:00'),
+(1, 5, 2, 4, '味道不错，就是有点碎了', '2025-04-19 09:30:00'),
+(2, 4, 3, 5, '裤子版型很好，尺码标准', NULL);
+
+INSERT INTO `购物车` (`用户ID`, `商品ID`) VALUES
+(1, 2),
+(1, 6),
+(2, 3),
+(3, 1),
+(3, 4);
+
+INSERT INTO `优惠信息` (`用户ID`, `优惠券ID`, `是否使用`, `失效日期`) VALUES
+(1, 1001, 0, '2025-05-01 23:59:59'),
+(1, 1002, 1, '2025-04-20 23:59:59'),
+(2, 1003, 0, '2025-05-10 23:59:59'),
+(3, 1001, 0, '2025-05-01 23:59:59');
